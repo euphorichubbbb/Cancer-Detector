@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns: th="http://www.thyleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Upload</title>
+    <link rel="stylesheet" th:href="@{/webjars/layui/2.5.7/css/layui.css}">
+    <link rel="stylesheet" th:href="@{/index.css}">
+    <script th:src="@{/webjars/layui/2.5.7/layui.js}"></script>
+</head>
+<body>
+<article>
+  <div class="layui-container">
+    <div class="layui-row">
+      <form class="layui-form" action="">
+        <input type="hidden" id="imagePath" name="imagePath" value="">
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">Upload</label>
+          <div class="layui-input-block">
+            <button type="button" class="layui-btn" id="test1">
+              <i class="layui-icon">&#xe67c;</i>Upload your image
+            </button>
+          </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">View</label>
+          <div class="layui-input-block">
+            <img id="image" >
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="upload">Submit</button>
+            <button type="reset" class="layui-btn layui-btn-primary">Reset</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</article>
+
+</body>
+</html>
+<script>
+  layui.use('upload', function(){
+    let upload = layui.upload;
+    let $ = layui.$;
+    //执行实例
+    let uploadInst = upload.render({
+      elem: '#test1' //绑定元素
+      ,url: '/upload/image' //上传接口
+      ,before: function (obj){
+        obj.preview(function (index,file,result){
+          $("#image").attr("src",result);
+        })
+      }
+      ,done: function(res){
+        if (res.code == 103){
+          layer.msg(res.msg);
+          let src = res.data.src;
+          // $("#image").attr("src",src);
+          $("#imagePath").attr("value",src);
+        }
+        else if(res.code == 104){
+          layer.msg(res.msg);
+        }
+      }
+      ,error: function(){
+        //请求异常回调
+      }
+    });
+  });
+
+
+  layui.use('form', function(){
+    let form = layui.form;
+    let $ = layui.$;
+    //监听表单的提交
+    form.on('submit(upload)', function(data){
+      $.ajax({
+        url: "/upload/addImage",
+        method: "post",
+        data: data.field,
+        dataType: "JSON",
+        success: function (res){
+          if (res ==103){
+            layer.msg("上传成功");
+          }
+        }
+      })
+      return false;
+    });
+  });
+</script>
